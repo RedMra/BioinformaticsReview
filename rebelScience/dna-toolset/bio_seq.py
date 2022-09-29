@@ -1,5 +1,4 @@
-
-from bio_structs import DNA_Codons, DNA_Nucleotides
+from bio_structs import DNA_Codons,RNA_Codons, Nucleotides_base
 from collections import Counter
 import random
 
@@ -15,7 +14,7 @@ class bio_seq:
 
     #DNA toolkit functions
     def __validate(self):# __ para poner pribada 
-        return set(DNA_Nucleotides).issuperset(self.seq)
+        return set(Nucleotides_base[self.seq_type]).issuperset(self.seq)
 
     def get_seq_biotype(self):
         return self.seq_type
@@ -24,7 +23,7 @@ class bio_seq:
         return f"[label]: {self.label}\n[Sequence]: {self.seq}\n[Biotype]: {self.seq_type}\n[Length]: {len(self.seq)}"
 
     def generate_rnd_seq(self, length =10,seq_type="DNA"):
-        seq = ''.join([random.choice(DNA_Nucleotides)
+        seq = ''.join([random.choice(Nucleotides_base[seq_type])
             for X in range(length)])
         self.__init__(seq, seq_type, " ramdomly generated sequence")
 
@@ -32,10 +31,15 @@ class bio_seq:
         return dict(Counter(self.seq))
     
     def transcription(self):
-        return self.seq.replace("T","U")
+        if self.seq_type == "DNA":
+            return self.seq.replace("T", "U")
+        return "Not DNA Sequence"
 
     def  reverse_complement(self):
-        mapping = str.maketrans('ATCG', 'TAGC')
+        if self.seq_type == "DNA":
+            mapping = str.maketrans('ATCG', 'TAGC')
+        else:
+            mapping = str.maketrans('AUCG', 'UAGC')
         return self.seq.translate(mapping)[::-1]
 
     def gc_content(self):
@@ -50,14 +54,22 @@ class bio_seq:
         return res
     
     def translate_seq(self, init_pos = 0):
-        return [DNA_Codons[self.seq[pos:pos + 3]] for pos in range(init_pos,len(self.seq) - 2, 3)]
+        if self.seq_type =="DNA":
+            return [DNA_Codons[self.seq[pos:pos + 3]] for pos in range(init_pos,len(self.seq) - 2, 3)]
+        elif self.seq_type == "RNA":
+            return [RNA_Codons[self.seq[pos:pos + 3]] for pos in range(init_pos,len(self.seq) - 2, 3)]
 
     def codon_usage(self, aminoacid):
         tmpList = []
-        for i in range(0, len(self.seq) - 2, 3):
-            if DNA_Codons[self.seq[i:i + 3]]== aminoacid:
-                tmpList.append(self.seq[i:i + 3])
-        
+        if self.seq_type == "DNA":
+            for i in range(0, len(self.seq) - 2, 3):
+                if DNA_Codons[self.seq[i:i + 3]]== aminoacid:
+                    tmpList.append(self.seq[i:i + 3])
+        elif self.seq_type =="RNA":
+            for i in range(0, len(self.seq) - 2, 3):
+                if RNA_Codons[self.seq[i:i + 3]]== aminoacid:
+                    tmpList.append(self.seq[i:i + 3])
+
         freqDict = dict(Counter(tmpList))
         totalWight = sum(freqDict.values())
         for seq in freqDict:
@@ -110,19 +122,4 @@ class bio_seq:
 
         if ordered:
             return sorted(Res, key=len, reverse=True)
-        return Res 
-
-# def readFile(filePath):
-#     """Reading a file and returning a list of lines"""
-#     with open(filePath, 'r') as f:
-#         return [l.strip() for l in f.readlines()]
-
-# seq_nn = readFile("/Users/mariaalejandrarojo/Desktop/MR/Bioinformatics/Test_Data/NM_000207.3.fasta")
-# seq_str = ""
-
-# for line in seq_nn:
-#     if '>' in line:
-#         pass
-#     else: 
-#         seq_str += line
-
+        return Res
