@@ -10,6 +10,7 @@ def lookig_seq(seq):
             first = seq.find(seq_k,first+1)
             if first == -1:
                 break
-    return new_list
+        answer = " ".join(map(str,new_list)) 
+    return answer
 
 print(lookig_seq(seq_s))
