@@ -1,4 +1,3 @@
-
 from tkinter import Frame
 from DNAtoolkit import *
 from Utilities import colored
